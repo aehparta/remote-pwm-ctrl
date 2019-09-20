@@ -22,62 +22,75 @@
 #include <btstack.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <esp_log.h>
 #include "spp.h"
 #include "pwm.h"
 
-int switch1 = 0, switch2 = 0;
+int switch1 = 0;
 int slider_red = 0, slider_green = 0, slider_blue = 0;
 
 void handle_line(char *line)
 {
 	int len = strlen(line);
-	if (strcmp(line, "get:config") == 0) {
+	if (strcmp(line, "get config") == 0) {
 		spp_printf(
-		    "config:channel:C:static:name:RGB\r\n"
-		    "config:channel:C:type:switch\r\n"
-		    "config:channel:C:mode:sink\r\n"
-		    "config:channel:C:method:push\r\n"
-		    "config:channel:D:static:name:Slider Red\r\n"
-		    "config:channel:D:type:slider\r\n"
-		    "config:channel:D:mode:sink\r\n"
-		    "config:channel:D:method:push\r\n"
-		    "config:channel:D:color:000000:ff0000\r\n"
-		    "config:channel:D:parent:C\r\n"
-		    "config:channel:E:static:name:Slider Green\r\n"
-		    "config:channel:E:type:slider\r\n"
-		    "config:channel:E:mode:sink\r\n"
-		    "config:channel:E:method:push\r\n"
-		    "config:channel:E:color:000000:00ff00\r\n"
-		    "config:channel:E:parent:C\r\n"
-		    "config:channel:F:static:name:Slider Blue\r\n"
-		    "config:channel:F:type:slider\r\n"
-		    "config:channel:F:mode:sink\r\n"
-		    "config:channel:F:method:push\r\n"
-		    "config:channel:F:color:000000:0000ff\r\n"
-		    "config:channel:F:parent:C\r\n"
-		    "C%d\r\n"
-		    "D%x\r\n"
-		    "E%x\r\n"
-		    "F%x\r\n",
-		    switch2,
+		    "device:name:RGB LED\n"
+		    "C:name:RGB\n"
+		    "C:type:switch\n"
+		    "C:mode:sink\n"
+		    "C:method:push\n"
+		    "D:name:Slider Red\n"
+		    "D:type:slider\n"
+		    "D:mode:sink\n"
+		    "D:method:push\n"
+		    "D:color:#000000,#ff0000\n"
+		    "D:parent:C\n"
+		    "E:name:Slider Green\n"
+		    "E:type:slider\n"
+		    "E:mode:sink\n"
+		    "E:method:push\n"
+		    "E:color:#000000,#00ff00\n"
+		    "E:parent:C\n"
+		    "F:name:Slider Blue\n"
+		    "F:type:slider\n"
+		    "F:mode:sink\n"
+		    "F:method:push\n"
+		    "F:color:#000000,#0000ff\n"
+		    "F:parent:C\n"
+		    "C%d\n"
+		    "D%x\n"
+		    "E%x\n"
+		    "F%x\n",
+		    switch1,
 		    slider_red,
 		    slider_green,
 		    slider_blue);
-	} else if (line[0] == 'C' && len > 1) {
-		switch2 = line[1] == '0' ? 0 : 1;
-		pwm_set_duty(0, (float)(switch2 ? slider_red : 0) * 100 / 255);
-		pwm_set_duty(1, (float)(switch2 ? slider_green : 0) * 100 / 255);
-		pwm_set_duty(2, (float)(switch2 ? slider_blue : 0) * 1000 / 255);
-	} else if (line[0] == 'D' && len > 1) {
-		slider_red = (int)strtol(line + 1, NULL, 16);
-		pwm_set_duty(0, (float)(switch2 ? slider_red : 0) * 100 / 255);
-	} else if (line[0] == 'E' && len > 1) {
-		slider_green = (int)strtol(line + 1, NULL, 16);
-		pwm_set_duty(1, (float)(switch2 ? slider_green : 0) * 100 / 255);
-	} else if (line[0] == 'F' && len > 1) {
-		slider_blue = (int)strtol(line + 1, NULL, 16);
-		pwm_set_duty(2, (float)(switch2 ? slider_blue : 0) * 100 / 255);
+		return;
 	}
+	if (len < 3) {
+		return;
+	}
+	if (line[1] != '=') {
+		return;
+	}
+
+	if (line[0] == 'C') {
+		switch1 = line[2] == '0' ? 0 : 1;
+		pwm_set_duty(0, (float)(switch1 ? slider_red : 0) * 100 / 255);
+		pwm_set_duty(1, (float)(switch1 ? slider_green : 0) * 100 / 255);
+		pwm_set_duty(2, (float)(switch1 ? slider_blue : 0) * 1000 / 255);
+	} else if (line[0] == 'D') {
+		slider_red = (int)strtol(line + 2, NULL, 16);
+		pwm_set_duty(0, (float)(switch1 ? slider_red : 0) * 100 / 255);
+	} else if (line[0] == 'E') {
+		slider_green = (int)strtol(line + 2, NULL, 16);
+		pwm_set_duty(1, (float)(switch1 ? slider_green : 0) * 100 / 255);
+	} else if (line[0] == 'F') {
+		slider_blue = (int)strtol(line + 2, NULL, 16);
+		pwm_set_duty(2, (float)(switch1 ? slider_blue : 0) * 100 / 255);
+	}
+
+	ESP_LOGI("app", "switch: %u, R: %u, G: %u, B: %u", switch1, slider_red, slider_green, slider_blue);
 }
 
 void task(void *p)
