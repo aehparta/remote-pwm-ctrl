@@ -31,54 +31,50 @@ int slider_red = 0, slider_green = 0, slider_blue = 0;
 void handle_line(char *line)
 {
 	int len = strlen(line);
-	if (strcmp(line, "get:config") == 0)
-	{
-		spp_printf("config:channel:C:static:name:RGB\r\n");
-		spp_printf("config:channel:C:type:switch\r\n");
-		spp_printf("config:channel:C:mode:sink\r\n");
-		spp_printf("config:channel:C:method:push\r\n");
-		spp_printf("config:channel:D:static:name:Slider Red\r\n");
-		spp_printf("config:channel:D:type:slider\r\n");
-		spp_printf("config:channel:D:mode:sink\r\n");
-		spp_printf("config:channel:D:method:push\r\n");
-		spp_printf("config:channel:D:color:000000:ff0000\r\n");
-		spp_printf("config:channel:D:parent:C\r\n");
-		spp_printf("config:channel:E:static:name:Slider Green\r\n");
-		spp_printf("config:channel:E:type:slider\r\n");
-		spp_printf("config:channel:E:mode:sink\r\n");
-		spp_printf("config:channel:E:method:push\r\n");
-		spp_printf("config:channel:E:color:000000:00ff00\r\n");
-		spp_printf("config:channel:E:parent:C\r\n");
-		spp_printf("config:channel:F:static:name:Slider Blue\r\n");
-		spp_printf("config:channel:F:type:slider\r\n");
-		spp_printf("config:channel:F:mode:sink\r\n");
-		spp_printf("config:channel:F:method:push\r\n");
-		spp_printf("config:channel:F:color:000000:0000ff\r\n");
-		spp_printf("config:channel:F:parent:C\r\n");
-		spp_printf("C%d\r\n", switch2);
-		spp_printf("D%x\r\n", slider_red);
-		spp_printf("E%x\r\n", slider_green);
-		spp_printf("F%x\r\n", slider_blue);
-	}
-	else if (line[0] == 'C' && len > 1)
-	{
+	if (strcmp(line, "get:config") == 0) {
+		spp_printf(
+		    "config:channel:C:static:name:RGB\r\n"
+		    "config:channel:C:type:switch\r\n"
+		    "config:channel:C:mode:sink\r\n"
+		    "config:channel:C:method:push\r\n"
+		    "config:channel:D:static:name:Slider Red\r\n"
+		    "config:channel:D:type:slider\r\n"
+		    "config:channel:D:mode:sink\r\n"
+		    "config:channel:D:method:push\r\n"
+		    "config:channel:D:color:000000:ff0000\r\n"
+		    "config:channel:D:parent:C\r\n"
+		    "config:channel:E:static:name:Slider Green\r\n"
+		    "config:channel:E:type:slider\r\n"
+		    "config:channel:E:mode:sink\r\n"
+		    "config:channel:E:method:push\r\n"
+		    "config:channel:E:color:000000:00ff00\r\n"
+		    "config:channel:E:parent:C\r\n"
+		    "config:channel:F:static:name:Slider Blue\r\n"
+		    "config:channel:F:type:slider\r\n"
+		    "config:channel:F:mode:sink\r\n"
+		    "config:channel:F:method:push\r\n"
+		    "config:channel:F:color:000000:0000ff\r\n"
+		    "config:channel:F:parent:C\r\n"
+		    "C%d\r\n"
+		    "D%x\r\n"
+		    "E%x\r\n"
+		    "F%x\r\n",
+		    switch2,
+		    slider_red,
+		    slider_green,
+		    slider_blue);
+	} else if (line[0] == 'C' && len > 1) {
 		switch2 = line[1] == '0' ? 0 : 1;
 		pwm_set_duty(0, (float)(switch2 ? slider_red : 0) * 100 / 255);
 		pwm_set_duty(1, (float)(switch2 ? slider_green : 0) * 100 / 255);
 		pwm_set_duty(2, (float)(switch2 ? slider_blue : 0) * 1000 / 255);
-	}
-	else if (line[0] == 'D' && len > 1)
-	{
+	} else if (line[0] == 'D' && len > 1) {
 		slider_red = (int)strtol(line + 1, NULL, 16);
 		pwm_set_duty(0, (float)(switch2 ? slider_red : 0) * 100 / 255);
-	}
-	else if (line[0] == 'E' && len > 1)
-	{
+	} else if (line[0] == 'E' && len > 1) {
 		slider_green = (int)strtol(line + 1, NULL, 16);
 		pwm_set_duty(1, (float)(switch2 ? slider_green : 0) * 100 / 255);
-	}
-	else if (line[0] == 'F' && len > 1)
-	{
+	} else if (line[0] == 'F' && len > 1) {
 		slider_blue = (int)strtol(line + 1, NULL, 16);
 		pwm_set_duty(2, (float)(switch2 ? slider_blue : 0) * 100 / 255);
 	}

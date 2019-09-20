@@ -10,8 +10,8 @@ int pwm_init(void)
 {
 	mcpwm_config_t cfg;
 
-	mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, 21);
-	mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, 22);
+	mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, 5);
+	mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, 18);
 	mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM1A, 23);
 
 	cfg.frequency = 1000;

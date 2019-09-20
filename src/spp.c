@@ -19,7 +19,6 @@ static void spp_recv_char(char byte)
 	/* check if line end was received */
 	if (byte == '\n' || byte == '\r') {
 		if (recv_len > 0 && recv_line) {
-			printf("recv queue item: %s\n", recv_line);
 			xQueueSendToBackFromISR(recv_queue, &recv_line, NULL);
 		} else if (recv_line) {
 			free(recv_line);
@@ -93,7 +92,6 @@ static void spp_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *p
 			char *data = NULL;
 			if (xQueueReceiveFromISR(send_queue, &data, NULL) == pdTRUE) {
 				char *p = data;
-				printf("\nsend: %s\n", data);
 				int len = strlen(data);
 				while (len > 0) {
 					int n = len > rfcomm_mtu ? rfcomm_mtu : len;
@@ -136,7 +134,6 @@ static void spp_heartbeat_handler(struct btstack_timer_source *ts)
 	if (rfcomm_cid) {
 		char *p = NULL;
 		if (xQueuePeekFromISR(send_queue, &p) == pdTRUE) {
-			// printf("\nhas: %s\n", p);
 			rfcomm_request_can_send_now_event(rfcomm_cid);
 		}
 	}
@@ -186,24 +183,6 @@ int spp_init(void)
 	return 0;
 }
 
-static int spp_send_data(uint8_t *data, int len)
-{
-	if (rfcomm_mtu < 1) {
-		printf("channel not open yet, will not send\n");
-		return -1;
-	}
-
-	while (len > 0) {
-		int n = len > rfcomm_mtu ? rfcomm_mtu : len;
-		rfcomm_send(rfcomm_cid, data, n);
-		data += n;
-		len -= n;
-	}
-
-	// rfcomm_request_can_send_now_event(rfcomm_cid);
-	return 0;
-}
-
 int spp_printf(const char *format, ...)
 {
 	char *data = NULL;
@@ -213,7 +192,6 @@ int spp_printf(const char *format, ...)
 	va_end(args);
 	xQueueSendToBackFromISR(send_queue, &data, NULL);
 	// rfcomm_request_can_send_now_event(rfcomm_cid);
-	// spp_send_data((void *)data, strlen(data));
 	return 0;
 }
 
