@@ -57,10 +57,10 @@ void handle_line(char *line)
 		    "F:method:push\n"
 		    "F:color:#000000,#0000ff\n"
 		    "F:parent:C\n"
-		    "C%d\n"
-		    "D%x\n"
-		    "E%x\n"
-		    "F%x\n",
+		    "C=%d\n"
+		    "D=%x\n"
+		    "E=%x\n"
+		    "F=%x\n",
 		    switch1,
 		    slider_red,
 		    slider_green,
@@ -109,9 +109,9 @@ int btstack_main(int argc, const char * argv[])
 {
 	pwm_init();
 
-	pwm_set_duty(0, 0);
-	pwm_set_duty(1, 0);
-	pwm_set_duty(2, 0);
+	pwm_set_duty(0, slider_red);
+	pwm_set_duty(1, slider_green);
+	pwm_set_duty(2, slider_blue);
 
 	spp_init();
 
